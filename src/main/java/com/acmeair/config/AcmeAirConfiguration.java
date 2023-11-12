@@ -77,7 +77,9 @@ public class AcmeAirConfiguration {
       return value.toString();
     }
 
-	
+
+	// this is stoopid - could do only one request to get all the counts
+	// to actually leverage the benefits of the monolith
 	
 	@GET
 	@Path("/countBookings")
