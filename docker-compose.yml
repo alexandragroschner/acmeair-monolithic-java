@@ -1,6 +1,6 @@
 acmeair-db:
   container_name: acmeair-db
-  image: mongo:3
+  image: mongo
   net: ${NETWORK}
 
 acmeair-monolithic-java:
