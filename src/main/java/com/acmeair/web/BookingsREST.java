@@ -16,23 +16,24 @@
 package com.acmeair.web;
 
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.FormParam;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 import com.acmeair.service.BookingService;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.logging.Logger;
 
 @Path("/api/bookings")
 public class BookingsREST {
 
 	@Inject
 	private BookingService bs;
+
+	private static final Logger logger = Logger.getLogger(BookingsREST.class.getName());
 	
 	@POST
 	@Consumes({"application/x-www-form-urlencoded"})
@@ -45,24 +46,7 @@ public class BookingsREST {
 			@FormParam("retFlightId") String retFlightId,
 			@FormParam("retFlightSegId") String retFlightSegId,
 			@FormParam("oneWayFlight") boolean oneWay) {
-		try {
-			String bookingIdTo = bs.bookFlight(userid, toFlightSegId, toFlightId);
-			
-			String bookingInfo = "";
-			
-			String bookingIdReturn = null;
-			if (!oneWay) {
-				bookingIdReturn = bs.bookFlight(userid, retFlightSegId, retFlightId);
-				bookingInfo = "{\"oneWay\":false,\"returnBookingId\":\"" + bookingIdReturn + "\",\"departBookingId\":\"" + bookingIdTo + "\"}";
-			}else {
-				bookingInfo = "{\"oneWay\":true,\"departBookingId\":\"" + bookingIdTo + "\"}";
-			}
-			return Response.ok(bookingInfo).build();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-		}
+		return bookFlightsAndCar(userid, toFlightId, toFlightSegId, retFlightId, retFlightSegId, oneWay, null);
 	}
 		
 	@GET
@@ -101,6 +85,86 @@ public class BookingsREST {
   	public Response status() {
     	return Response.ok("OK").build();
   	}
-	
+
+	  // USER ADDED CODE
+
+	@POST
+	@Consumes({"application/x-www-form-urlencoded"})
+	@Path("/bookflightsandcar")
+	@Produces("text/plain")
+	public Response bookFlightsAndCar(@QueryParam("userid") String userid,
+									  @QueryParam("toFlightId") String toFlightId,
+									  @QueryParam("toFlightSegId") String toFlightSegId,
+									  @QueryParam("retFlightId") String retFlightId,
+									  @QueryParam("retFlightSegId") String retFlightSegId,
+									  @QueryParam("oneWayFlight") boolean oneWay,
+									  @QueryParam("carname") String carName) {
+
+		try {
+			List<Long> newPrices = new ArrayList<>();
+			String bookingId;
+			Long totalPrice;
+
+			boolean carBooked = Objects.nonNull(carName) && !carName.equals("null") && !carName.trim().isEmpty();
+
+			if (!oneWay) {
+				logger.warning("Booking is not one way.");
+
+				// todo: get new prices from reward tracker - for now added dummy newFlightPrice and newCarPrice
+				newPrices.add(500L);
+				newPrices.add(100L);
+
+				if (carBooked) {
+					logger.warning("Booking includes car.");
+					totalPrice = newPrices.get(0) + newPrices.get(1);
+					bookingId = bs.bookFlightWithCar(userid, toFlightSegId, toFlightId, retFlightId, carName,
+							// totalPrice
+							totalPrice.toString(),
+							// newFlightPrice
+							newPrices.get(0).toString(),
+							// newCarPrice (0 if no car)
+							newPrices.get(1).toString());
+				} else {
+					logger.warning("Booking includes no car.");
+					bookingId = bs.bookFlight(userid, toFlightSegId, toFlightId, retFlightId, newPrices.get(0).toString());
+				}
+			} else {
+				logger.warning("Booking is one way.");
+
+				// todo: get new prices from reward tracker - for now added dummy newFlightPrice and newCarPrice
+				newPrices.add(300L);
+				newPrices.add(100L);
+
+				if (carBooked) {
+					logger.warning("Booking includes car.");
+					totalPrice = newPrices.get(0) + newPrices.get(1);
+					bookingId = bs.bookFlightWithCar(userid, toFlightSegId, toFlightId, "NONE - ONE WAY FLIGHT", carName,
+							// totalPrice
+							totalPrice.toString(),
+							// newFlightPrice
+							newPrices.get(0).toString(),
+							// newCarPrice (0 if no car)
+							newPrices.get(1).toString());
+				} else {
+					logger.warning("Booking includes no car.");
+					bookingId = bs.bookFlight(userid, toFlightSegId, toFlightId, "NONE - ONE WAY FLIGHT", newPrices.get(0).toString());
+				}
+			}
+
+			String bookingInfo = "{\"oneWay\":\"" + oneWay
+					+ "\",\"price\":\"" + (newPrices.get(0) + newPrices.get(1))
+					+ "\",\"flightPrice\":\"" + newPrices.get(0)
+					+ "\",\"carPrice\":\"" + newPrices.get(1)
+					+ "\",\"bookingId\":\"" + bookingId
+					+ "\",\"carBooked\":\"" + (Objects.nonNull(carName) ? carName : "NONE")
+					+ "\"}";
+
+			return Response.ok(bookingInfo).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+
+	}
 
 }

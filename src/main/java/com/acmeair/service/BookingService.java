@@ -23,7 +23,8 @@ public interface BookingService {
 	//String bookFlight(String customerId, FlightPK flightId);
 //	String bookFlight(String customerId, String flightId);
 	
-	String bookFlight(String customerId, String flightSegmentId, String FlightId);
+	String bookFlight(String customerId, String flightSegmentId, String FlightId,
+					  String retFlightId, String price);
 	
 	String getBooking(String user, String id);
 
@@ -36,4 +37,7 @@ public interface BookingService {
 	void dropBookings();
 
 	String getServiceType();
+
+	String bookFlightWithCar(String customerId, String flightSegmentId, String flightId, String retFlightId,
+							 String carName, String totalPrice, String flightPrice, String carPrice);
 }

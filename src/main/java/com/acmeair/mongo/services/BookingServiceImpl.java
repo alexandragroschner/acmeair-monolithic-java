@@ -42,15 +42,20 @@ public class BookingServiceImpl implements BookingService, MongoConstants {
 		booking = database.getCollection("booking");
 	}	
 	
-	public String bookFlight(String customerId, String flightId) {
+	public String bookFlight(String customerId, String flightId, String retFlightId, String price) {
 		try{
 			
 			String bookingId = keyGenerator.generate().toString();
 						
 			Document bookingDoc = new Document("_id", bookingId)
-            .append("customerId", customerId)
-            .append("flightId", flightId)
-            .append("dateOfBooking",  new Date());
+					.append("customerId", customerId)
+					.append("flightId", flightId)
+					.append("retFlightId", retFlightId)
+					.append("carBooked", "NONE")
+					.append("dateOfBooking",  new Date())
+					.append("flightPrice", price)
+					.append("carPrice", 0)
+					.append("totalPrice", price);
 			
 			booking.insertOne(bookingDoc);
 			
@@ -61,8 +66,30 @@ public class BookingServiceImpl implements BookingService, MongoConstants {
 	}
 
 	@Override
-	public String bookFlight(String customerId, String flightSegmentId, String flightId) {
-		return bookFlight(customerId, flightId);	
+	public String bookFlight(String customerId, String flightSegmentId, String flightId,
+							 String retFlightId, String price) {
+
+		if (flightSegmentId == null) {
+			return bookFlight(customerId, flightId, retFlightId, price);
+		} else {
+			try {
+				String bookingId = keyGenerator.generate().toString();
+
+				Document bookingDoc = new Document("_id", bookingId)
+						.append("customerId", customerId)
+						.append("flightId", flightId)
+						.append("retFlightId", retFlightId)
+						.append("carBooked", "NONE")
+						.append("dateOfBooking", new Date())
+						.append("flightPrice", price)
+						.append("carPrice", "0")
+						.append("totalPrice", price);
+				booking.insertOne(bookingDoc);
+				return bookingId;
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 	
 	@Override
@@ -126,4 +153,28 @@ public class BookingServiceImpl implements BookingService, MongoConstants {
     public String getServiceType() {
       return "mongo";
     }
+
+	// USER ADDED CODE
+	@Override
+	public String bookFlightWithCar(String customerId, String flightSegmentId, String flightId, String retFlightId,
+									String carName, String totalPrice, String flightPrice, String carPrice) {
+		try {
+			String bookingId = keyGenerator.generate().toString();
+
+			Document bookingDoc = new Document("_id", bookingId)
+					.append("customerId", customerId)
+					.append("flightId", flightId)
+					.append("retFlightId", retFlightId)
+					.append("carBooked", carName)
+					.append("dateOfBooking", new Date())
+					.append("flightPrice", flightPrice)
+					.append("carPrice", carPrice)
+					.append("totalPrice", totalPrice);
+
+			booking.insertOne(bookingDoc);
+			return bookingId;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

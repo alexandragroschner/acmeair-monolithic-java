@@ -77,3 +77,11 @@ Add these environment variables and restage
  - Follow the instruction [here](https://github.com/blueperf/acmeair-driver)
  - Use AcmeAir-v5.jmx insread of AcmeAir-microservices.jmx (Note: there is a limitation for JAX-RS to use root directory)
  - jmeter -n -t AcmeAir-v5.jmx -DusePureIDs=true -JHOST=hostname -JPORT=80 -j logName -JTHREAD=1 -JUSER=999 -JDURATION=60 -JRAMP=0 ;
+
+# Interacting with the service
+
+Sample request for booking with car:
+```
+# expected return: {"oneWay":"true","price":"400","flightPrice":"300","carPrice":"100","bookingId":"58f334c7-92a1-49a4-8f43-dc6118039e42","carBooked":"trabant"}
+curl -X POST -b "acmeair_sessionid=c14232fe-5d47-40b9-81fc-f627875c6197;loggedinuser=uid0@email.com" "http://localhost/rest/api/bookings/bookflightsandcar?userid=uid0@email.com&toFlightId=1abdf548-bbe4-4120-8bcf-b96427bf0e6a&oneWayFlight=true&carname=trabant"
+```
