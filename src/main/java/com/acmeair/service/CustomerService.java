@@ -15,6 +15,7 @@
 *******************************************************************************/
 package com.acmeair.service;
 
+import com.acmeair.util.MilesAndLoyaltyPoints;
 import jakarta.inject.Inject;
 
 import org.json.simple.JSONObject;
@@ -23,6 +24,8 @@ import org.json.simple.parser.ParseException;
 
 import com.acmeair.web.dto.CustomerInfo;
 
+import java.util.List;
+
 public abstract class CustomerService {
 	protected static final int DAYS_TO_ALLOW_SESSION = 1;
 	
@@ -30,8 +33,7 @@ public abstract class CustomerService {
 	protected KeyGenerator keyGenerator;
 	
 	public abstract void createCustomer(
-			String username, String password, String status, int total_miles,
-			int miles_ytd, String phoneNumber, String phoneNumberType, String addressJson);
+			String username, String password, String phoneNumber, String phoneNumberType, String addressJson);
 	
 	public abstract String createAddress (String streetAddress1, String streetAddress2,
 			String city, String stateProvince, String country, String postalCode);
@@ -77,5 +79,11 @@ public abstract class CustomerService {
 	public abstract Long count();
 
 	public abstract void dropCustomers();
-		
+
+	// USER ADDED CODE
+
+	public abstract MilesAndLoyaltyPoints getCustomerMilesAndLoyalty (String username);
+
+	public abstract MilesAndLoyaltyPoints updateCustomerMilesAndPoints(String customerId, Long miles, Long loyaltyPoints);
+
 }

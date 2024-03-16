@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.acmeair.util.CostAndMiles;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -190,5 +191,9 @@ public abstract class FlightService {
 	public abstract Long countAirports();
 
 	public abstract void dropFlights();
+
+	public abstract CostAndMiles getCostAndMilesById(String flightId);
+	protected abstract Long getRewardMilesFromSegment(String segmentId);
+
 
 }

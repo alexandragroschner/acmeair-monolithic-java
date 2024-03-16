@@ -33,6 +33,9 @@ public class BookingsREST {
 	@Inject
 	private BookingService bs;
 
+	@Inject
+	RewardTracker rewardTracker;
+
 	private static final Logger logger = Logger.getLogger(BookingsREST.class.getName());
 	
 	@POST
@@ -101,7 +104,7 @@ public class BookingsREST {
 									  @QueryParam("carname") String carName) {
 
 		try {
-			List<Long> newPrices = new ArrayList<>();
+			List<Long> newPrices;
 			String bookingId;
 			Long totalPrice;
 
@@ -110,9 +113,10 @@ public class BookingsREST {
 			if (!oneWay) {
 				logger.warning("Booking is not one way.");
 
-				// todo: get new prices from reward tracker - for now added dummy newFlightPrice and newCarPrice
-				newPrices.add(500L);
-				newPrices.add(100L);
+				newPrices = rewardTracker.updateRewardMiles(userid, toFlightId, retFlightId, true, carName, oneWay);
+
+				logger.warning("new flight price is: " + newPrices.get(0));
+				logger.warning("new car price is: " + newPrices.get(1));
 
 				if (carBooked) {
 					logger.warning("Booking includes car.");
@@ -131,9 +135,7 @@ public class BookingsREST {
 			} else {
 				logger.warning("Booking is one way.");
 
-				// todo: get new prices from reward tracker - for now added dummy newFlightPrice and newCarPrice
-				newPrices.add(300L);
-				newPrices.add(100L);
+				newPrices = rewardTracker.updateRewardMiles(userid, toFlightId,null, true, carName, true);
 
 				if (carBooked) {
 					logger.warning("Booking includes car.");

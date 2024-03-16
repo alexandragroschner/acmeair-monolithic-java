@@ -15,6 +15,12 @@
 *******************************************************************************/
 package com.acmeair.service;
 
+import com.acmeair.util.MilesAndLoyaltyPoints;
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.List;
 
 
@@ -40,4 +46,13 @@ public interface BookingService {
 
 	String bookFlightWithCar(String customerId, String flightSegmentId, String flightId, String retFlightId,
 							 String carName, String totalPrice, String flightPrice, String carPrice);
+
+    List<Integer> getFlightRewardMapping();
+
+	void loadRewardDbs() throws IOException;
+
+	void loadDb(MongoCollection<Document> collection, String resource) throws IOException;
+
+	JSONObject getFlightRewardLevel(Integer id);
+
 }

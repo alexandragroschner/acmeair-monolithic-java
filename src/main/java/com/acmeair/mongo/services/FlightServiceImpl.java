@@ -17,15 +17,22 @@ package com.acmeair.mongo.services;
 
 import static com.mongodb.client.model.Filters.eq;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.acmeair.util.CostAndMiles;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import jakarta.json.JsonReaderFactory;
 import org.bson.Document;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -46,7 +53,8 @@ import com.acmeair.mongo.ConnectionManager;
 @ApplicationScoped
 public class FlightServiceImpl extends FlightService implements  MongoConstants {
 
-	//private final static Logger logger = Logger.getLogger(FlightService.class.getName()); 
+	private final static Logger logger = Logger.getLogger(FlightService.class.getName());
+	private static final JsonReaderFactory factory = Json.createReaderFactory(null);
 	
 	private MongoCollection<Document> flight;
 	private MongoCollection<Document> flightSegment;
@@ -206,5 +214,51 @@ public class FlightServiceImpl extends FlightService implements  MongoConstants 
 		airportCodeMapping.deleteMany(new Document());
 		flightSegment.deleteMany(new Document());
 		flight.deleteMany(new Document());
+	}
+
+	// USER ADDED CODE
+
+	@Override
+	protected Long getRewardMilesFromSegment(String segmentId) {
+		try {
+			String segment = flightSegment.find(new BasicDBObject("_id", segmentId)).first().toJson();
+
+			JsonReader jsonReader = factory.createReader(new StringReader(segment));
+			JsonObject segmentJson = jsonReader.readObject();
+			jsonReader.close();
+
+			return segmentJson.getJsonNumber("miles").longValue();
+
+		} catch (java.lang.NullPointerException e) {
+			if (logger.isLoggable(Level.FINE)) {
+				logger.fine("getFlightSegment returned no flightSegment available");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/**
+	 * Method to find base economy cost and bonus miles of a flight
+	 * corresponding to the passed flight id.
+	 * @param flightId unique key of flight in db
+	 * @return base economy cost and bonus miles of the flight
+	 */
+	@Override
+	public CostAndMiles getCostAndMilesById(String flightId) {
+		//search flight by ID
+		String flightById = flight.find(eq("_id", flightId)).first().toJson();
+
+		//create Json Object from response
+		JsonReader jsonReader = factory.createReader(new StringReader(flightById));
+		JsonObject flightByIdJson = jsonReader.readObject();
+		jsonReader.close();
+
+		CostAndMiles costAndMiles = new CostAndMiles();
+		costAndMiles.setCost(flightByIdJson.getJsonNumber("economyClassBaseCost").longValue());
+		costAndMiles.setMiles(getRewardMilesFromSegment(flightByIdJson.getJsonString("flightSegmentId").getString()));
+
+		return costAndMiles;
 	}
 }

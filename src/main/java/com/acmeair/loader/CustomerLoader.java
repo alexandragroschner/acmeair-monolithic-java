@@ -37,7 +37,7 @@ public class CustomerLoader {
 		String addressJson =  "{streetAddress1 : \"123 Main St.\", streetAddress2 :null, city: \"Anytown\", stateProvince: \"NC\", country: \"USA\", postalCode: \"27617\"}";
 		
 		for (long ii = 0; ii < numCustomers; ii++) {
-			customerService.createCustomer("uid"+ii+"@email.com", "password", "GOLD", 1000000, 1000, "919-123-4567", "BUSINESS", addressJson);
+			customerService.createCustomer("uid"+ii+"@email.com", "password", "919-123-4567", "BUSINESS", addressJson);
 		}
 	}
 
