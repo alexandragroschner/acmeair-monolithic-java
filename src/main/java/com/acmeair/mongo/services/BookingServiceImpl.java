@@ -2,7 +2,6 @@ package com.acmeair.mongo.services;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Updates.combine;
-import static com.mongodb.client.model.Updates.set;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +13,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import com.acmeair.util.MilesAndLoyaltyPoints;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -23,7 +21,6 @@ import org.bson.Document;
 
 import com.acmeair.mongo.MongoConstants;
 import com.acmeair.service.BookingService;
-import com.acmeair.service.FlightService;
 import com.acmeair.service.KeyGenerator;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -202,6 +199,18 @@ public class BookingServiceImpl implements BookingService, MongoConstants {
 
 		return getSortedIds(ids);
 	}
+
+	@Override
+	public List<Integer> getCarRewardMapping() {
+		// from https://stackoverflow.com/a/42696322
+		List<String> ids = StreamSupport.stream(rewardCarCollection.distinct("_id", String.class).spliterator(),
+				false).collect(Collectors.toList());
+
+		logger.warning("Got all ids of flight rewards");
+
+		return getSortedIds(ids);
+	}
+
 	private static List<Integer> getSortedIds(List<String> ids) {
 		List<Integer> intIds = new ArrayList<>();
 		for (String id : ids) {
@@ -259,6 +268,16 @@ public class BookingServiceImpl implements BookingService, MongoConstants {
 			return new JSONObject(rewardFlightCollection.find(eq("_id", id.toString())).first().toJson());
 		} catch (NullPointerException e) {
 			logger.warning("Did not find flightRewardMapping for " + id);
+			throw new RuntimeException();
+		}
+	}
+
+	@Override
+	public JSONObject getCarRewardLevel(Integer id) {
+		try {
+			return new JSONObject(rewardCarCollection.find(eq("_id", id.toString())).first().toJson());
+		} catch (NullPointerException e) {
+			logger.warning("Did not find carRewardMapping for " + id);
 			throw new RuntimeException();
 		}
 	}

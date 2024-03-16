@@ -1,6 +1,6 @@
 package com.acmeair.web.dto;
 
-public class CarDTO {
+public class Car {
     private String id;
     private String carName;
     private int baseCost;
@@ -8,14 +8,14 @@ public class CarDTO {
 
     // this needs to use setter methods instead of "this.id = id;"
     // probably due to reflection API
-    public CarDTO(String id, String carName, int baseCost, Long loyaltyPoints) {
+    public Car(String id, String carName, int baseCost, Long loyaltyPoints) {
         this.setId(id);
         this.setCarName(carName);
         this.setBaseCost(baseCost);
         this.setLoyaltyPoints(loyaltyPoints);
     }
 
-    public CarDTO() {
+    public Car() {
         //CDI
     }
 

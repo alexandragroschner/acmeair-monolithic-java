@@ -49,10 +49,13 @@ public interface BookingService {
 
     List<Integer> getFlightRewardMapping();
 
+	List<Integer> getCarRewardMapping();
+
 	void loadRewardDbs() throws IOException;
 
 	void loadDb(MongoCollection<Document> collection, String resource) throws IOException;
 
 	JSONObject getFlightRewardLevel(Integer id);
 
+	JSONObject getCarRewardLevel(Integer id);
 }
