@@ -35,9 +35,6 @@ public class BookingServiceImpl implements BookingService, MongoConstants {
 
 	private final static Logger logger = Logger.getLogger(BookingService.class.getName());
 	private MongoCollection<Document> booking;
-	private MongoCollection<Document> rewardFlightCollection;
-	private MongoCollection<Document> rewardCarCollection;
-
 	@Inject
 	KeyGenerator keyGenerator;
 
@@ -45,14 +42,6 @@ public class BookingServiceImpl implements BookingService, MongoConstants {
 	public void initialization() {
 		MongoDatabase database = ConnectionManager.getConnectionManager().getDB();
 		booking = database.getCollection("booking");
-		rewardFlightCollection = database.getCollection("rewardFlight");
-		rewardCarCollection = database.getCollection("rewardCar");
-
-		try {
-			loadRewardDbs();
-		} catch (Exception e) {
-			logger.warning("Error in initialization of BookingServiceImpl" + e);
-		}
 	}
 
 	public String bookFlight(String customerId, String flightId, String retFlightId, String price) {
@@ -189,96 +178,4 @@ public class BookingServiceImpl implements BookingService, MongoConstants {
 		}
 	}
 
-	@Override
-	public List<Integer> getFlightRewardMapping() {
-		// from https://stackoverflow.com/a/42696322
-		List<String> ids = StreamSupport.stream(rewardFlightCollection.distinct("_id", String.class).spliterator(),
-				false).collect(Collectors.toList());
-
-		logger.warning("Got all ids of flight rewards");
-
-		return getSortedIds(ids);
-	}
-
-	@Override
-	public List<Integer> getCarRewardMapping() {
-		// from https://stackoverflow.com/a/42696322
-		List<String> ids = StreamSupport.stream(rewardCarCollection.distinct("_id", String.class).spliterator(),
-				false).collect(Collectors.toList());
-
-		logger.warning("Got all ids of flight rewards");
-
-		return getSortedIds(ids);
-	}
-
-	private static List<Integer> getSortedIds(List<String> ids) {
-		List<Integer> intIds = new ArrayList<>();
-		for (String id : ids) {
-			intIds.add(Integer.valueOf(id));
-		}
-
-		// sort ids ascending
-		Collections.sort(intIds);
-		return intIds;
-	}
-
-	@Override
-	public void loadRewardDbs() throws IOException {
-		loadDb(rewardFlightCollection, "/milesstatusmapping.csv");
-		loadDb(rewardCarCollection, "/loyaltypointsstatusmapping.csv");
-	}
-
-	@Override
-	public void loadDb(MongoCollection<Document> collection, String resource) throws IOException {
-
-		if (collection.countDocuments() != 0) {
-			logger.warning("Loading booking db aborted. Database is not empty!");
-			return;
-		}
-
-		InputStream csvInputStream = BookingServiceImpl.class.getResourceAsStream(resource);
-
-		assert csvInputStream != null;
-		LineNumberReader lnr = new LineNumberReader(new InputStreamReader(csvInputStream));
-
-		while (true) {
-			String line = lnr.readLine();
-			// end reading lines when EOF
-			if (line == null || line.trim().isEmpty()) {
-				break;
-			}
-			StringTokenizer st = new StringTokenizer(line, ",");
-			ArrayList<String> lineAsStringArray = new ArrayList<>();
-
-			// adds value of every column of current line to array as string
-			while (st.hasMoreTokens()) {
-				lineAsStringArray.add(st.nextToken());
-			}
-			logger.warning("Inserting values for status: " + lineAsStringArray.get(1));
-
-			collection.insertOne(new Document("_id", lineAsStringArray.get(0))
-					.append("status", lineAsStringArray.get(1))
-					.append("reduction", lineAsStringArray.get(2)));
-		}
-	}
-
-	@Override
-	public JSONObject getFlightRewardLevel(Integer id) {
-		try {
-			return new JSONObject(rewardFlightCollection.find(eq("_id", id.toString())).first().toJson());
-		} catch (NullPointerException e) {
-			logger.warning("Did not find flightRewardMapping for " + id);
-			throw new RuntimeException();
-		}
-	}
-
-	@Override
-	public JSONObject getCarRewardLevel(Integer id) {
-		try {
-			return new JSONObject(rewardCarCollection.find(eq("_id", id.toString())).first().toJson());
-		} catch (NullPointerException e) {
-			logger.warning("Did not find carRewardMapping for " + id);
-			throw new RuntimeException();
-		}
-	}
 }

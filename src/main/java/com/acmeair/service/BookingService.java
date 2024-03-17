@@ -47,15 +47,4 @@ public interface BookingService {
 	String bookFlightWithCar(String customerId, String flightSegmentId, String flightId, String retFlightId,
 							 String carName, String totalPrice, String flightPrice, String carPrice);
 
-    List<Integer> getFlightRewardMapping();
-
-	List<Integer> getCarRewardMapping();
-
-	void loadRewardDbs() throws IOException;
-
-	void loadDb(MongoCollection<Document> collection, String resource) throws IOException;
-
-	JSONObject getFlightRewardLevel(Integer id);
-
-	JSONObject getCarRewardLevel(Integer id);
 }

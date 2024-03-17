@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 import static com.mongodb.client.model.Filters.eq;
 
 @ApplicationScoped
-public class CarServiceImpl extends CarService implements MongoConstants {
+public class CarServiceImpl implements MongoConstants, CarService {
 
     private MongoCollection<Document> carCollection;
     private static final Logger logger = Logger.getLogger(CarServiceImpl.class.getName());
@@ -98,7 +98,7 @@ public class CarServiceImpl extends CarService implements MongoConstants {
     }
 
     @Override
-    protected void loadCarDb() throws IOException {
+    public void loadCarDb() throws IOException {
         if (carCollection.countDocuments() != 0) {
             logger.warning("Loading reward db aborted. Database is not empty!");
             return;

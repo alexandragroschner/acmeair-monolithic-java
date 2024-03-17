@@ -4,14 +4,14 @@ import com.acmeair.web.dto.Car;
 
 import java.io.IOException;
 
-public abstract class CarService {
-    protected abstract Car getCar(String id);
+public interface CarService {
+    public Car getCar(String id);
 
-    public abstract Car getCarByName(String name);
+    public Car getCarByName(String name);
 
-    protected abstract String insertCar(String name, String baseCost, String loyaltyPoints);
+    public String insertCar(String name, String baseCost, String loyaltyPoints);
 
-    protected abstract void loadCarDb() throws IOException;
+    public void loadCarDb() throws IOException;
 
-    protected abstract void purgeDb();
+    public void purgeDb();
 }
