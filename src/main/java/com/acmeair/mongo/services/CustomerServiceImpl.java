@@ -87,10 +87,7 @@ public class CustomerServiceImpl extends CustomerService implements MongoConstan
 			address.append("streetAddress2", customerInfo.getAddress().getStreetAddress2());
 		}
 		customer.updateOne(eq("_id", customerInfo.get_id()), 
-				combine(set("status", customerInfo.getStatus()),
-						set("total_miles", customerInfo.getTotal_miles()),
-						set("miles_ytd", customerInfo.getMiles_ytd()),
-						set("address", address),
+				combine(set("address", address),
 						set("phoneNumber", customerInfo.getPhoneNumber()),
 						set("phoneNumberType", customerInfo.getPhoneNumberType())));
 	}
@@ -103,9 +100,12 @@ public class CustomerServiceImpl extends CustomerService implements MongoConstan
 	@Override
 	public String getCustomerByUsername(String username) {
 		Document customerDoc = customer.find(eq("_id", username)).first();
+		MilesAndLoyaltyPoints milesAndLoyaltyPoints = getCustomerMilesAndLoyalty(username);
 		if (customerDoc != null) {
 			customerDoc.remove("password");
 			customerDoc.append("password", null);
+			customerDoc.append("total_miles", milesAndLoyaltyPoints.getMiles().toString());
+			customerDoc.append("loyaltyPoints", milesAndLoyaltyPoints.getLoyaltyPoints().toString());
 		}
 		return customerDoc.toJson();
 	}
