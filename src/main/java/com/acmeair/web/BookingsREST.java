@@ -16,13 +16,17 @@
 package com.acmeair.web;
 
 import jakarta.inject.Inject;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import jakarta.json.JsonReaderFactory;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 import com.acmeair.service.BookingService;
 
-import java.util.ArrayList;
+import java.io.StringReader;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
@@ -37,6 +41,8 @@ public class BookingsREST {
 	RewardTracker rewardTracker;
 
 	private static final Logger logger = Logger.getLogger(BookingsREST.class.getName());
+
+	private static final JsonReaderFactory factory = Json.createReaderFactory(null);
 	
 	@POST
 	@Consumes({"application/x-www-form-urlencoded"})
@@ -74,11 +80,33 @@ public class BookingsREST {
 			@FormParam("number") String number,
 			@FormParam("userid") String userid) {
 		try {
-			bs.cancelBooking(userid, number);
+			JsonObject booking;
+
+			try {
+				JsonReader jsonReader = factory.createReader(new StringReader(bs
+						.getBooking(userid, number)));
+				booking = jsonReader.readObject();
+				jsonReader.close();
+
+				bs.cancelBooking(userid, number);
+			}
+			catch (RuntimeException e) {
+				// Booking has already been deleted...
+				return Response.ok("booking " + number + " deleted.").build();
+			}
+
+			boolean isOneWay = booking.getString("retFlightId").equals("NONE - ONE WAY FLIGHT");
+
+			if (booking.getString("carBooked").equalsIgnoreCase("none")) {
+				rewardTracker.updateRewardMiles(userid, booking.getString("flightId"),
+						booking.getString("retFlightId"), false, null, isOneWay);
+			} else {
+				rewardTracker.updateRewardMiles(userid, booking.getString("flightId"),
+						booking.getString("retFlightId"), false, booking.getString("carBooked"), isOneWay);
+			}
+
 			return Response.ok("booking " + number + " deleted.").build();
-					
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}

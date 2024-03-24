@@ -55,6 +55,10 @@ public class RewardTracker {
             }
         }
 
+        if (!add) {
+            costAndMiles.setMiles((costAndMiles.getMiles()) * -1);
+        }
+
         MilesAndLoyaltyPoints customerMilesAndLoyalty = customerService.getCustomerMilesAndLoyalty(userid);
         logger.warning("current miles: " + customerMilesAndLoyalty.getMiles() + " and points: "
                 + customerMilesAndLoyalty.getLoyaltyPoints());
@@ -79,6 +83,9 @@ public class RewardTracker {
             updatedPrices.add(0L);
         }
 
+        if (!add) {
+            loyaltyPoints = loyaltyPoints * -1;
+        }
 
         // update customer miles and loyalty points
         MilesAndLoyaltyPoints updatedMilesAndLoyalty = customerService.updateCustomerMilesAndPoints(userid, totalFlightMiles, loyaltyPoints);
