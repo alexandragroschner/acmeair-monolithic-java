@@ -122,15 +122,21 @@ public class CustomerServiceImpl extends CustomerService implements MongoConstan
 
 		MilesAndLoyaltyPoints customerMilesAndLoyaltyReturn = new MilesAndLoyaltyPoints();
 
-		Document doc = customerRewardData.find(eq("_id", username)).first();
-        if (Objects.isNull(doc)) {
+		/* REMOVED DB CALL
+		Document doc = customerRewardData.find(eq("_id", customerId)).first();
+		*/
+		// ADDED HARD-CODED DOC
+		Document doc = new Document();
+
+        if (Objects.isNull(null)) {
 			logger.warning("Reward data for customer " + username + " does not exist - Inserting now...");
 
 			Document customerRewardDataEntry = new Document("_id", username)
 					.append("miles", "0")
 					.append("loyaltyPoints", "0");
-
+			/* REMOVED DB CALL
 			customerRewardData.insertOne(customerRewardDataEntry);
+			 */
 			customerMilesAndLoyaltyReturn.setMiles(0L);
 			customerMilesAndLoyaltyReturn.setLoyaltyPoints(0L);
 			return customerMilesAndLoyaltyReturn;
@@ -148,11 +154,15 @@ public class CustomerServiceImpl extends CustomerService implements MongoConstan
 	@Override
 	public MilesAndLoyaltyPoints updateCustomerMilesAndPoints(String customerId, Long miles, Long loyaltyPoints) {
 
+		/* REMOVED DB CALL
 		Document doc = customerRewardData.find(eq("_id", customerId)).first();
+		*/
+		// ADDED HARD-CODED DOC
+		Document doc = new Document();
 
 		MilesAndLoyaltyPoints updatedMilesAndPoints = new MilesAndLoyaltyPoints(0L, 0L);
 		// if customer does not exist, create customer with 0
-		if (Objects.isNull(doc)) {
+		if (Objects.isNull(null)) {
 			logger.warning("Reward data for customer " + customerId + " does not exist - Inserting now...");
 
 			Document customerRewardDataEntry = new Document("_id", customerId)
@@ -162,7 +172,9 @@ public class CustomerServiceImpl extends CustomerService implements MongoConstan
 			updatedMilesAndPoints.setMiles(miles);
 			updatedMilesAndPoints.setLoyaltyPoints(loyaltyPoints);
 
+			/* REMOVED DB CALL
 			customerRewardData.insertOne(customerRewardDataEntry);
+			 */
 		} else {
 			logger.warning("Existing data for user found in customerRewardData");
 			JSONObject jsonObject = new JSONObject(doc.toJson());
@@ -170,9 +182,12 @@ public class CustomerServiceImpl extends CustomerService implements MongoConstan
 			updatedMilesAndPoints.setMiles(jsonObject.getLong("miles") + miles);
 			updatedMilesAndPoints.setLoyaltyPoints(jsonObject.getLong("loyaltyPoints") + loyaltyPoints);
 
+			/* REMOVED DB CALL
 			customerRewardData.updateOne(eq("_id", customerId),
 					combine(set("miles", updatedMilesAndPoints.getMiles().toString()),
 							set("loyaltyPoints", updatedMilesAndPoints.getLoyaltyPoints().toString())));
+
+			 */
 		}
 		return updatedMilesAndPoints;
 
