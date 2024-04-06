@@ -40,13 +40,20 @@ public class CarServiceImpl implements MongoConstants, CarService {
     }
     @Override
     public Car getCar(String id) {
-        JSONObject jsonObject = new JSONObject();
         try {
+            /* REMOVED DB CALL
             try  {
                 jsonObject = new JSONObject(carCollection.find(eq("_id", id)).first().toJson());
             } catch (Exception e) {
                 logger.warning("Could not get car from db");
             }
+             */
+            // ADDED HARD-CODED CAR
+            Document carDoc = new Document("_id", id)
+                    .append("carName", "trabant")
+                    .append("baseCost", "100")
+                    .append("loyaltyPoints", "20");
+            JSONObject jsonObject = new JSONObject(carDoc);
             return new Car(id, jsonObject.getString("carName"),
                     Integer.parseInt(jsonObject.getString("baseCost")),
                     Long.parseLong(jsonObject.getString("loyaltyPoints")));
@@ -57,13 +64,20 @@ public class CarServiceImpl implements MongoConstants, CarService {
 
     @Override
     public Car getCarByName(String name) {
-        JSONObject jsonObject = new JSONObject();
         try {
+            /* REMOVED DB CALL
             try  {
                 jsonObject = new JSONObject(carCollection.find(eq("carName", name.toLowerCase())).first().toJson());
             } catch (Exception e) {
                 logger.warning("Could not get car from db with name " + name);
             }
+             */
+            // ADDED HARD-CODED CAR
+            Document carDoc = new Document("_id", "98e7c77c-53af-4a1f-9cb7-b6ae57ac7cd4")
+                    .append("carName", "trabant")
+                    .append("baseCost", "50")
+                    .append("loyaltyPoints", "10");
+            JSONObject jsonObject = new JSONObject(carDoc);
             return new Car(jsonObject.getString("_id"), name,
                     Integer.parseInt(jsonObject.getString("baseCost")),
                     Long.parseLong(jsonObject.getString("loyaltyPoints")));

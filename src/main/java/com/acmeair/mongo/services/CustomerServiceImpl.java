@@ -42,7 +42,11 @@ public class CustomerServiceImpl extends CustomerService implements MongoConstan
 	
 	@Override
 	public Long count() {
+		/* REMOVED DB CALL
 		return customer.count();
+		 */
+		// ADDED HARD-CODED COUNT
+		return 1L;
 	}
 		
 	@Override
@@ -86,21 +90,42 @@ public class CustomerServiceImpl extends CustomerService implements MongoConstan
 		if (customerInfo.getAddress().getStreetAddress2() != null){
 			address.append("streetAddress2", customerInfo.getAddress().getStreetAddress2());
 		}
+		/* REMOVED DB CALL
 		customer.updateOne(eq("_id", customerInfo.get_id()), 
 				combine(set("address", address),
 						set("phoneNumber", customerInfo.getPhoneNumber()),
 						set("phoneNumberType", customerInfo.getPhoneNumberType())));
+		 */
 	}
 
 	@Override
-	protected String getCustomer(String username) {					
+	protected String getCustomer(String username) {
+		/* REMOVED DB CALL
 		return customer.find(eq("_id", username)).first().toJson();
+		 */
+		// ADDED HARD-CODED USER
+		return getCustomerByUsername(username);
 	}
 	
 	@Override
 	public String getCustomerByUsername(String username) {
+		/* REMOVED DB CALL
 		Document customerDoc = customer.find(eq("_id", username)).first();
+		*/
 		MilesAndLoyaltyPoints milesAndLoyaltyPoints = getCustomerMilesAndLoyalty(username);
+		// ADDED HARD-CODED ADDRESS AND USER
+		Document addressDoc = new Document("streetAddress1", "123 Main St.")
+				.append("city", "Anytown")
+				.append("stateProvince", "NC")
+				.append("country", "USA")
+				.append("postalCode", "27617");
+
+		Document customerDoc = new Document("_id", username)
+				.append("password", "password")
+				.append("address", Document.parse(addressDoc.toJson()))
+				.append("phoneNumber", "919-123-4567")
+				.append("phoneNumberType", "BUSINESS");
+
 		if (customerDoc != null) {
 			customerDoc.remove("password");
 			customerDoc.append("password", null);

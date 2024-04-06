@@ -57,7 +57,9 @@ public abstract class CustomerService {
 				e.printStackTrace();
 			}
 		}
-		return validatedCustomer;
+		// REMOVED CUSTOMER VALIDATION (DUE TO LACK OF CHECKING AGAINST DB)
+		// return validatedCustomer;
+		return true;
 	}
 	
 	public String getCustomerByUsernameAndPassword(String username, String password) {

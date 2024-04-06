@@ -84,9 +84,17 @@ public class RewardServiceImpl implements RewardService {
     }
 
     private List<Integer> getFlightRewardMapping() {
+        /* REMOVED DB CALL
         // from https://stackoverflow.com/a/42696322
         List<String> ids = StreamSupport.stream(rewardFlightCollection.distinct("_id", String.class).spliterator(),
                 false).collect(Collectors.toList());
+         */
+        // ADDED HARD-CODED IDS
+        List<String> ids = new ArrayList<>();
+        ids.add("700");
+        ids.add("1400");
+        ids.add("3500");
+        ids.add("8000");
 
         logger.warning("Got all ids of flight rewards");
 
@@ -94,9 +102,17 @@ public class RewardServiceImpl implements RewardService {
     }
 
     private List<Integer> getCarRewardMapping() {
+        /* REMOVED DB CALL
         // from https://stackoverflow.com/a/42696322
         List<String> ids = StreamSupport.stream(rewardCarCollection.distinct("_id", String.class).spliterator(),
                 false).collect(Collectors.toList());
+         */
+        // ADDED HARD-CODED IDS
+        List<String> ids = new ArrayList<>();
+        ids.add("150");
+        ids.add("600");
+        ids.add("900");
+        ids.add("1200");
 
         logger.warning("Got all ids of flight rewards");
 
@@ -115,21 +131,36 @@ public class RewardServiceImpl implements RewardService {
     }
 
     private JSONObject getFlightRewardLevel(Integer id) {
+        /* REMOVED DB CALL
         try {
             return new JSONObject(rewardFlightCollection.find(eq("_id", id.toString())).first().toJson());
         } catch (NullPointerException e) {
             logger.warning("Did not find flightRewardMapping for " + id);
             throw new RuntimeException();
         }
+         */
+
+        // ADDED HARD-CODED REWARD MAPPING
+        Document flightRewardMappingDoc = new Document("_id", id)
+                .append("status", "peasant")
+                .append("reduction", "0");
+        return new JSONObject(flightRewardMappingDoc);
     }
 
     private JSONObject getCarRewardLevel(Integer id) {
+        /* REMOVED DB CALL
         try {
             return new JSONObject(rewardCarCollection.find(eq("_id", id.toString())).first().toJson());
         } catch (NullPointerException e) {
             logger.warning("Did not find carRewardMapping for " + id);
             throw new RuntimeException();
         }
+         */
+        // ADDED HARD-CODED REWARD MAPPING
+        Document carRewardMappingDoc = new Document("_id", id)
+                .append("status", "walker")
+                .append("reduction", "0");
+        return new JSONObject(carRewardMappingDoc);
     }
 
     @Override
