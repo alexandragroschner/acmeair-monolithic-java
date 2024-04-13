@@ -104,7 +104,7 @@ public class CustomerServiceImpl extends CustomerService implements MongoConstan
 		return customer.find(eq("_id", username)).first().toJson();
 		 */
 		// ADDED HARD-CODED USER
-		return getCustomerByUsername(username);
+		return createFakeCustomerDoc(username).toJson();
 	}
 	
 	@Override
@@ -112,27 +112,34 @@ public class CustomerServiceImpl extends CustomerService implements MongoConstan
 		/* REMOVED DB CALL
 		Document customerDoc = customer.find(eq("_id", username)).first();
 		*/
-		MilesAndLoyaltyPoints milesAndLoyaltyPoints = getCustomerMilesAndLoyalty(username);
 		// ADDED HARD-CODED ADDRESS AND USER
+		Document customerDoc = createFakeCustomerDoc(username);
+
+		if (customerDoc != null) {
+			customerDoc.remove("password");
+			customerDoc.append("password", null);
+		}
+		return customerDoc.toJson();
+	}
+
+	private Document createFakeCustomerDoc(String username) {
 		Document addressDoc = new Document("streetAddress1", "123 Main St.")
 				.append("city", "Anytown")
 				.append("stateProvince", "NC")
 				.append("country", "USA")
 				.append("postalCode", "27617");
 
+		MilesAndLoyaltyPoints milesAndLoyaltyPoints = getCustomerMilesAndLoyalty(username);
+
 		Document customerDoc = new Document("_id", username)
 				.append("password", "password")
 				.append("address", Document.parse(addressDoc.toJson()))
 				.append("phoneNumber", "919-123-4567")
-				.append("phoneNumberType", "BUSINESS");
+				.append("phoneNumberType", "BUSINESS")
+				.append("total_miles", milesAndLoyaltyPoints.getMiles().toString())
+				.append("loyaltyPoints", milesAndLoyaltyPoints.getLoyaltyPoints().toString());
 
-		if (customerDoc != null) {
-			customerDoc.remove("password");
-			customerDoc.append("password", null);
-			customerDoc.append("total_miles", milesAndLoyaltyPoints.getMiles().toString());
-			customerDoc.append("loyaltyPoints", milesAndLoyaltyPoints.getLoyaltyPoints().toString());
-		}
-		return customerDoc.toJson();
+		return customerDoc;
 	}
 
 	@Override
